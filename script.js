@@ -1,33 +1,112 @@
-const galleryData = {
-    nature: ['annie-spratt-GJCLsZ4GtRE-unsplash.jpg', 'annie-spratt-gJMls7cPvts-unsplash.jpg', 'emily-sandoval-PBbCf6RQwdI-unsplash.jpg', 'esma-melike-sezer-k8zIoFzMXNw-unsplash.jpg', 'katie-kirkman-CW4VeRjMZjE-unsplash.jpg', 'silali-banerjee-3JLRF3Yn3f0-unsplash.jpg', 'sodo-sane-1O1KExjoQQY-unsplash.jpg', 'viktoriya-lissachenko-cShMGr61WD4-unsplash.jpg'],
-    people: ['agung-prayoga-r5ygkIlNNE4-unsplash.jpg', 'alghozy-nGh-7uMHT98-unsplash.jpg', 'kamara-rahmat-1GeBFmg0Xa0-unsplash.jpg', 'esma-melike-sezer-f7741znO77s-unsplash.jpg','kamara-rahmat-tezBLHCZ7ao-unsplash.jpg', 'round-icons-r9M-Qe6Thgc-unsplash.jpg'],
-    streets: ['aliaksei-lepik-goa_pgKhAnI-unsplash.jpg', 'artur-adilkhanian-EIo9tWYAFc4-unsplash.jpg', 'bruno-bd-FFGHpRop-DU-unsplash.jpg', 'gabriele-merlino-fa5so58oDAI-unsplash.jpg', 'martin-bennie-MhYU5K4A93I-unsplash.jpg', 'ruben-mavarez-wWcadZJcsYM-unsplash.jpg', 'the-metropolitan-museum-of-art-S2WA31buOIA-unsplash.jpg'],
-};
+/* Lightbox */
+const lightbox = document.querySelector(".lightbox");
+const lightboxSlides = document.querySelectorAll(".lightbox-slide");
+const allImages = Array.from(document.querySelectorAll(".image"));
+const lightboxPrev = document.querySelector(".lightbox-prev");
+const lightboxNext = document.querySelector(".lightbox-next");
+const lightboxClose = document.querySelector(".lightbox-close");
 
-const gridGallery = document.querySelector('.grid-gallery');
+let currentIndex = 0;
+let currentFilter = "all";
 
-for (const category in galleryData) {
+ function openLightbox() {
+    const clickedImage = event.target;
+    currentIndex = allImages.indexOf(clickedImage);
+    showSlide(currentIndex);
+    lightbox.style.display = "flex";
+    lightbox.style.justifyContent = "center";
+    lightbox.style.alignItems = "center";   
+    document.body.style.overflow = "hidden";
+ };
+ 
+ function closeLightbox() {
+    lightbox.style.display = "none";
+    document.body.style.overflow = "auto";
+ }
 
-    const categoryGallery = document.createElement('div');
-    gridGallery.appendChild(categoryGallery);
-    categoryGallery.classList.add('category');
+ lightbox.addEventListener("click", (e) => {
+    if(e.target === lightbox) {
+        closeLightbox();
+    }
+ });
 
-    const categoryTitle = document.createElement('h2');
-    categoryTitle.textContent = category;
-    categoryTitle.classList.add('category-title');
-    categoryGallery.appendChild(categoryTitle);
-
-    const gridImages = document.createElement('div');
-    gridImages.classList.add('grid-images');
-    categoryGallery.appendChild(gridImages);
-
-    galleryData[category].forEach(image => {
-        const img = document.createElement('img');
-        img.classList.add('image');
-        img.src = `./assets/images/${category}/${image}`;
-        img.alt = image;
-        gridImages.appendChild(img);
+ function showSlide(index) {
+    lightboxSlides.forEach(e => {
+        e.style.display = "none"
     });
-    
+
+    lightboxSlides[index].style.display = "flex";
+ }
+
+ function getFilteredIndexes() {
+    return allImages.map((img, i) => i).filter(i => currentFilter === "all" || img_category(i) === currentFilter);
+ }
+
+ function img_category(i) {
+    return allImages[i].closest(".category").dataset.category;
+ }
+
+ function plusSlides(direction) {
+    const list = getFilteredIndexes();
+    const posInList = list.indexOf(currentIndex);
+    const newPos = (posInList + direction + list.length) % list.length;
+    currentIndex = list[newPos];
+    showSlide(currentIndex);
+ }
+
+ lightboxClose.addEventListener("click", closeLightbox);
+ lightboxPrev.addEventListener("click", () => plusSlides(-1));
+ lightboxNext.addEventListener("click", () => plusSlides(1));
+
+ document.addEventListener("keydown", (e) => {
+    if (lightbox.style.display !== "flex") return; 
+
+    if (e.key === "Escape") {
+        closeLightbox();
+    } else if (e.key === "ArrowLeft") {
+        plusSlides(-1);
+    } else if (e.key === "ArrowRight") {
+        plusSlides(1);
+    }
+ });
+
+/* Filtering */
+const navLinks = document.querySelectorAll(".navigation-list a, .footer-navigation-list a");
+const categories = document.querySelectorAll(".category");
+
+function applyFilter(filter) {
+
+    currentFilter = filter;
+
+    navLinks.forEach(link => {
+        link.classList.toggle("active", link.dataset.filter === filter);
+    });
+
+    document.querySelector(".grid-gallery").classList.toggle("single-view", filter !== "all");
+
+    categories.forEach(cat => {
+        const show = (filter === "all") || (cat.dataset.category === filter);
+
+        if(show) {  
+            cat.style.display = "flex";
+            requestAnimationFrame(() => { cat.classList.remove("hidden")});
+        } else {
+            cat.classList.add("hidden");
+            setTimeout(() => {
+                if(cat.classList.contains("hidden")) {
+                    cat.style.display = "none";
+                }
+            }, 300)
+        }
+    });
+
+    window.scrollTo({top: 0, behavior: "smooth"});
+
 }
 
+navLinks.forEach(link => {
+    link.addEventListener("click", (e)=> {
+        e.preventDefault();
+        applyFilter(link.dataset.filter);
+    });
+})
