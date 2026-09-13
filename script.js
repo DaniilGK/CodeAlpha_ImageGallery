@@ -84,30 +84,32 @@ let currentFilter = "all";
  }
 
  /* Swipe navigation */
- let touchStartX = 0;
- let touchEndX = 0;
+let touchStartX = 0;
+let touchEndX = 0;
 
- lightbox.addEventListener("touchstart", (e) => {
-    touchStartX = e.changedTouches[0].srceenX;
- }, {passive: true});
+lightbox.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
 
- lightbox.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].srceenX;
-    HandleSwipe();
- }, {passive: true});
+lightbox.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
 
- function HandleSwipe() {
+function handleSwipe() {
     const diff = touchEndX - touchStartX;
     const threshold = 50;
 
-    if(Math.abs(diff) < threshold) return;
+    if (Math.abs(diff) < threshold) return;
 
-    if(diff < 0) {
+    if (diff < 0) {
+        flashActive(lightboxNext);
         plusSlides(1);
     } else {
+        flashActive(lightboxPrev);
         plusSlides(-1);
     }
- }
+}
 
 /* Filtering */
 const navLinks = document.querySelectorAll(".navigation-list a, .footer-navigation-list a");

@@ -308,6 +308,17 @@ a:hover {
     .lightbox-close:active { 
         transform: scale(1.25); color: #646161; 
     }
+
+    .lightbox-prev.active-key,
+    .lightbox-next.active-key {
+        transform: translateY(-50%) scale(1.25);
+        color: #646161;
+    }
+
+    .lightbox-close.active-key {
+        transform: scale(1.25);
+        color: #646161;
+    }
 }
 
 /* Responsive */
